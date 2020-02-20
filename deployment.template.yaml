@@ -1,0 +1,126 @@
+apiVersion: v1
+kind: Template
+metadata:
+  name: ${NAME}-deployment-template
+labels:
+  template: ${NAME}
+objects:
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    labels:
+      app: ${NAME}${SUFFIX}
+    name: ${NAME}${SUFFIX}
+  spec:
+    replicas: 2
+    selector:
+      matchLabels:
+        app: ${NAME}${SUFFIX}
+    strategy:
+      activeDeadlineSeconds: 21600
+      resources: {}
+    template:
+      metadata:
+        labels:
+          app: ${NAME}${SUFFIX}
+      spec:
+        containers:
+        - image: ${IMAGE_FQDN}
+          imagePullPolicy: IfNotPresent
+          name: ${NAME}
+          ports:
+          - containerPort: 5001
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          env:
+          - name: DB_HOST
+            value: ${PATRONI_SERVICE}
+          - name: DB_PORT
+            value: '5432'
+          - name: DB_NAME
+            valueFrom:
+              secretKeyRef:
+                key: app-db-name
+                name: ${DB_SECRET_NAME}
+          - name: DB_USERNAME
+            valueFrom:
+              secretKeyRef:
+                key: app-db-username
+                name: ${DB_SECRET_NAME}
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: app-db-password
+                name: ${DB_SECRET_NAME}
+          - name: DOCUMIZEPORT
+            value: '5001'
+          - name: DOCUMIZEDBTYPE
+            value: postgresql
+          - name: DOCUMIZESALT
+            value: tsu3Acndky8cdTNx3
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: ${NAME}${SUFFIX}
+  spec:
+    ports:
+    - name: 5001-tcp
+      port: 5001
+      protocol: TCP
+      targetPort: 5001
+    selector:
+      app: ${NAME}${SUFFIX}
+    sessionAffinity: None
+    type: ClusterIP
+- apiVersion: route.openshift.io/v1
+  kind: Route
+  metadata:
+    name: ${NAME}${SUFFIX}
+  spec:
+    host: ${HOST_VALUE}
+    port:
+      targetPort: 5001-tcp
+    tls:
+      insecureEdgeTerminationPolicy: Redirect
+      termination: edge
+    to:
+      kind: Service
+      name: ${NAME}${SUFFIX}
+      weight: 100
+    wildcardPolicy: None
+parameters:
+- description: A name used for all objects
+  displayName: Name
+  name: NAME
+  required: true
+  value: documize
+- description: A name suffix used for all objects
+  displayName: Suffix
+  name: SUFFIX
+  required: false
+  value: -p
+- description: Image Full name including registry path
+  displayName: Imange Name
+  name: IMAGE_FQDN
+  required: true
+  value: docker-registry.default.svc:5000/geopaas/documize
+- description: The url of documize app
+  displayName: documize app url
+  name: HOST_VALUE
+  required: false
+  value: ''
+- description: The name of the OpenShift Service exposed for the patroni-persistent-master container.
+  displayName: Master service name
+  name: PATRONI_SERVICE
+  value: documize-master-db
+- description: The name of the secret
+  displayName: Secret Name
+  name: DB_SECRET_NAME
+  value: documize-db
