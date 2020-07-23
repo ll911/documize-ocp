@@ -1,7 +1,8 @@
 FROM alpine:3.11
 MAINTAINER leo.lou@gov.bc.ca
 
-ARG DISTBIN="https://documize.s3-eu-west-1.amazonaws.com/downloads/documize-community-linux-amd64"
+#ARG DISTBIN="https://documize.s3-eu-west-1.amazonaws.com/downloads/documize-community-linux-amd64"
+ARG DISTBIN="https://github.com/documize/community/releases/download/v3.7.0/documize-community-linux-amd64"
 
 COPY entrypoint.sh /usr/bin/entrypoint.sh
 RUN apk update \
