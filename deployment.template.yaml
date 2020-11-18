@@ -40,10 +40,7 @@ objects:
           - name: DB_PORT
             value: '5432'
           - name: DB_NAME
-            valueFrom:
-              secretKeyRef:
-                key: app-db-name
-                name: ${DB_SECRET_NAME}
+            value: 'documize'
           - name: DB_USERNAME
             valueFrom:
               secretKeyRef:
@@ -59,7 +56,7 @@ objects:
           - name: DOCUMIZEDBTYPE
             value: postgresql
           - name: DOCUMIZESALT
-            value: tsu3Acndky8cdTNx3
+            value: ${DOCUMIZESALT}
         dnsPolicy: ClusterFirst
         restartPolicy: Always
         schedulerName: default-scheduler
@@ -83,6 +80,8 @@ objects:
   kind: Route
   metadata:
     name: ${NAME}${SUFFIX}
+    annotations:
+      kubernetes.io/tls-acme: 'true'    
   spec:
     host: ${HOST_VALUE}
     port:
@@ -105,22 +104,28 @@ parameters:
   displayName: Suffix
   name: SUFFIX
   required: false
-  value: -p
+  value: -persistent
 - description: Image Full name including registry path
   displayName: Imange Name
   name: IMAGE_FQDN
   required: true
-  value: docker-registry.default.svc:5000/geopaas/documize
+  value: image-registry.openshift-image-registry.svc:5000/7f7ed0-tools/documize
 - description: The url of documize app
   displayName: documize app url
   name: HOST_VALUE
   required: false
   value: ''
-- description: The name of the OpenShift Service exposed for the patroni-persistent-master container.
-  displayName: Master service name
+- description: The name of the OpenShift Service exposed for DB.
+  displayName: Master DB service name
   name: PATRONI_SERVICE
-  value: documize-master-db
+  value: isd-master-pdb
 - description: The name of the secret
   displayName: Secret Name
   name: DB_SECRET_NAME
-  value: documize-db
+  value: isd-pdb
+- description: Documize init salt.
+  displayName: Documize Salt gen
+  name: DOCUMIZESALT
+  generate: expression
+  from: '[a-zA-Z0-9]{32}'
+  required: true
