@@ -109,7 +109,7 @@ parameters:
   displayName: Imange Name
   name: IMAGE_FQDN
   required: true
-  value: image-registry.openshift-image-registry.svc:5000/7f7ed0-tools/documize
+  value: quay.io/bcgov/documize
 - description: The url of documize app
   displayName: documize app url
   name: HOST_VALUE
