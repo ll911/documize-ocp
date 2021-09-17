@@ -1,4 +1,4 @@
-FROM alpine:3.12
+FROM alpine:3.14
 MAINTAINER leo.lou@gov.bc.ca
 
 ARG DISTBIN="https://documize.s3-eu-west-1.amazonaws.com/downloads/documize-community-linux-amd64"
