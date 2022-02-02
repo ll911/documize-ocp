@@ -1,4 +1,4 @@
-FROM alpine:3.15
+FROM quay.io/llrealm/baseutil:main
 MAINTAINER leo.lou@gov.bc.ca
 
 ARG DISTBIN="https://documize.s3-eu-west-1.amazonaws.com/downloads/documize-community-linux-amd64"
