@@ -7,7 +7,7 @@ ARG DISTBIN="https://documize.s3-eu-west-1.amazonaws.com/downloads/documize-comm
 
 COPY entrypoint.sh /usr/bin/entrypoint.sh
 RUN apk update \
- && apk --no-cache add expat git openssh-client \
+ && apk --no-cache add expat>2.4.4-r0 git openssh-client \
  && apk --no-cache add --virtual devs tar curl \
  && curl --silent --show-error --fail --location \
       --header "Accept: application/tar+gzip, application/x-gzip, application/octet-stream" -o /usr/bin/documize \
